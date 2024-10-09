@@ -80,9 +80,11 @@ elif analyze_button:
         # Query the index
         query_engine = index.as_query_engine()
         response = query_engine.query(
-            '''Based on this resume, please provide the top 3 job titles or roles that would be most suitable for this candidate, without any explanations.
-               Ensure that the titles are listed in order of suitability, using numbering (1., 2., 3.). 
-               Additionally, specify the industry or sector the candidate is targeting, such as technology, finance, healthcare, or marketing, to refine the suggestions.
+            '''
+            Based on this resume or CV, please provide the top 3 job titles or roles that would be most suitable for this candidate,
+            without any explanations. Ensure that the titles are listed in order of suitability, using numbering (1., 2., 3.). 
+            If the input is not a resume or CV, return an empty result. Additionally, specify the industry or sector the candidate is targeting, 
+            such as technology, finance, healthcare, or marketing, to refine the suggestions.
             '''
         )
 
