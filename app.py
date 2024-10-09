@@ -80,7 +80,7 @@ elif analyze_button:
         # Query the index
         query_engine = index.as_query_engine()
         response = query_engine.query(
-            "Based on this resume, what job titles or roles would be most suitable for this candidate? Please list only the top 3 job titles without any additional explanation."
+            "Based on this resume, what job titles or roles would be most suitable for this candidate? Please list only the top 3 job titles without any additional explanation. Also make sure that it is provided in the order which is most suitable and in numbering (1. , 2. , 3. )"
         )
 
         # Display results
