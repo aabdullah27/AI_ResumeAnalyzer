@@ -1,8 +1,11 @@
-# Resume Analyzer
+# Resume Analyzer 📝
 
 ## Overview
 
 The **Resume Analyzer** is an intelligent web application designed to analyze uploaded resumes and provide suitable job title suggestions based on their content. By leveraging advanced natural language processing (NLP) techniques and embeddings, this tool helps job seekers better understand their qualifications and potential job opportunities.
+
+Try out the live demo here:  
+[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://ai-resumeanalyzer.streamlit.app/)
 
 ## Features
 
@@ -12,7 +15,7 @@ The **Resume Analyzer** is an intelligent web application designed to analyze up
 - **Integration with Hugging Face**: Utilizes state-of-the-art embedding models for accurate text analysis.
 - **Groq Language Model**: Employs a powerful language model to enhance the analysis and suggestions.
 
-## Technologies Used
+## Technologies Used ⚙️
 
 - **Python**: The primary programming language used for development.
 - **Streamlit**: A framework for building the web application interface.
@@ -20,17 +23,10 @@ The **Resume Analyzer** is an intelligent web application designed to analyze up
 - **FAISS**: A library for efficient similarity search and clustering of dense vectors.
 - **LlamaIndex**: A framework for handling vector stores and indexing.
 
-## Deployment
-
-The Resume Analyzer is deployed on Streamlit. You can access it using the following link:
-
-[Resume Analyzer App](https://your-streamlit-app-link)
-
-## Installation
+## Installation ⏳
 
 To run the Resume Analyzer locally, follow these steps:
-
-1. **Clone the Repository**:
+**Clone the Repository**:
 
    ```bash
    git clone https://github.com/yourusername/resume-analyzer.git
