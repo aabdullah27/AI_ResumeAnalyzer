@@ -81,10 +81,9 @@ elif analyze_button:
         query_engine = index.as_query_engine()
         response = query_engine.query(
             '''
-            Based on this resume or CV, please provide the top 3 job titles or roles that would be most suitable for this candidate,
-            without any explanations. Ensure that the titles are listed in order of suitability, using numbering (1., 2., 3.). 
-            If the input is not a resume or CV, return an empty result. Also extract the name, age from it and provide it in a sperate line 
-            like (Name: , Age: )
+            Based on this resume or CV, please provide the name and age if present, in a proper format than provide top 3 job titles or roles that would be most 
+            suitable for this candidate, without any explanations. Ensure that the titles are listed in order of suitability, using
+            numbering (1., 2., 3.). If the input is not a resume or CV, return an empty result.
             '''
         )
 
