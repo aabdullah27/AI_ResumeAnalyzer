@@ -6,90 +6,108 @@ from llama_index.core import VectorStoreIndex, Document
 from llama_index.vector_stores.faiss import FaissVectorStore
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.llms.groq import Groq
-from llama_index.core import Settings  # Import Settings directly
+from llama_index.core import Settings
 from pypdf import PdfReader
 from docx import Document as DocxDocument
 
-# Set up Streamlit page
-st.set_page_config(page_title="Resume Analyzer 📝", layout="wide")
-st.title("Resume Analyzer 📝")
 
-# Sidebar for API key input
-with st.sidebar:
-    st.header("Configuration ⚙️")
-    groq_api_key = st.text_input("Enter your Groq API Key 🔑", type="password")
+def extract_text(uploaded_file):
+    """Extract text from the uploaded resume file."""
+    # Save uploaded file temporarily
+    with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(uploaded_file.name)[1]) as temp_file:
+        temp_file.write(uploaded_file.getvalue())
+        temp_file_path = temp_file.name
 
-    # File uploader
-    uploaded_file = st.file_uploader("Upload your resume (PDF, DOCX, or TXT) 📄", type=["pdf", "docx", "txt"])
-
-    analyze_button = st.button("Analyze Resume 🔍")
-
-# Main content area
-if not groq_api_key:
-    st.warning("⚠️ Please enter your Groq API key in the sidebar.")
-elif not uploaded_file:
-    st.warning("⚠️ Please upload a resume file in the sidebar.")
-elif analyze_button:
-    with st.spinner("Analyzing your resume... ⏳"):
-        # Save uploaded file temporarily
-        with tempfile.NamedTemporaryFile(delete=False, suffix=os.path.splitext(uploaded_file.name)[1]) as temp_file:
-            temp_file.write(uploaded_file.getvalue())
-            temp_file_path = temp_file.name
-
-        # Extract text from the file
+    text = ""
+    try:
         if uploaded_file.type == "application/pdf":
             pdf_reader = PdfReader(temp_file_path)
-            text = ""
-            for page in pdf_reader.pages:
-                text += page.extract_text()
+            text = "".join(page.extract_text() for page in pdf_reader.pages)
         elif uploaded_file.type == "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
             doc = DocxDocument(temp_file_path)
-            text = "\n".join([paragraph.text for paragraph in doc.paragraphs])
+            text = "\n".join(paragraph.text for paragraph in doc.paragraphs)
         else:  # Assume it's a text file
             with open(temp_file_path, 'r') as file:
                 text = file.read()
+    finally:
+        os.unlink(temp_file_path)  # Clean up the temporary file
 
-        # Clean up the temporary file
-        os.unlink(temp_file_path)
+    return text
 
-        # Set up RAG components
-        embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en")
-        Settings.embed_model = embed_model  # Set the embedding model in the Settings
 
-        # Create a FAISS index
-        d = 768  # Dimension (you can adjust this based on your embedding model)
-        faiss_index = faiss.IndexFlatL2(d)
+def create_query():
+    """Construct the query for the LLM."""
+    return '''
+    Based on this resume or CV, perform the following:
+    1. Experience Analysis: Determine the total years of experience and categorize the candidate as Junior, Mid-level, or Senior.
+    2. Extract top 3 projects or accomplishments listed in the resume.
+    3. ATS Compatibility Score: Provide a score out of 10 based on formatting, keyword usage, and structure.
+    4. Readability and Clarity Rating: Rate the clarity of the resume on a scale of 1 to 10.
+    5. Job Roles: Tell the top 3 JOB roles this candidate is perfect for in a numbering manner.
+    6. Name and Age: Show the name and age if available.
+    NOTE: If there is any content except Resume or CV, provide a polite answer to upload a CV for analysis.
+    '''
 
-        # Create the FAISS vector store
-        vector_store = FaissVectorStore(faiss_index=faiss_index)
 
-        # Initialize the Groq model with an appropriate model name
-        groq_model_name = "gemma2-9b-it"  # Replace with the actual model name you want to use
-        llm = Groq(api_key=groq_api_key, model=groq_model_name)
+# Streamlit app setup
+st.set_page_config(page_title="Resume Analyzer", page_icon="📝",layout="wide")
+st.title("Resume Analyzer 📝")
 
-        # Set the embedding model in Settings directly
-        Settings.llm = llm
+# Sidebar configuration
+with st.sidebar:
+    st.header("Configuration ⚙️")
+    groq_api_key = st.text_input("Enter your Groq API Key 🔑", type="password")
+    uploaded_file = st.file_uploader("Upload your resume (PDF, DOCX, or TXT) 📄", type=["pdf", "docx", "txt"])
+    analyze_button = st.button("Analyze Resume 🔍")
 
-        # Create documents and index
-        documents = [Document(text=text)]
-        index = VectorStoreIndex.from_documents(
-            documents,
-            vector_store=vector_store
-        )
+# Main content area
+if not groq_api_key or not uploaded_file:
+    st.warning("⚠️ Please enter your Groq API key and upload a resume.")
+elif analyze_button:
+    with st.spinner("Analyzing your resume... ⏳"):
+        try:
+            # Extract text from the uploaded file
+            text = extract_text(uploaded_file)
 
-        # Query the index
-        query_engine = index.as_query_engine()
-        response = query_engine.query(
-            '''
-            Based on this resume or CV, please provide the name and age if present, in a proper format than provide top 3 job titles or roles that would be most 
-            suitable for this candidate, without any explanations. Ensure that the titles are listed in order of suitability, using
-            numbering (1., 2., 3.). If the input is not a resume or CV, return an empty result.
-            '''
-        )
+            # Set up RAG components
+            embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-small-en")
+            Settings.embed_model = embed_model  # Set the embedding model in the Settings
 
-        # Display results
-        st.header("Suitable Job Titles 🎯")
-        st.write(response.response)
+            # Create a FAISS index
+            d = 768  # Dimension (you can adjust this based on your embedding model)
+            faiss_index = faiss.IndexFlatL2(d)
+
+            # Create the FAISS vector store
+            vector_store = FaissVectorStore(faiss_index=faiss_index)
+
+            # Initialize the Groq model with an appropriate model name
+            groq_model_name = "gemma2-9b-it"  # Replace with the actual model name you want to use
+            llm = Groq(api_key=groq_api_key, model=groq_model_name)
+
+            # Set the LLM in Settings
+            Settings.llm = llm
+
+            # Create documents and index
+            documents = [Document(text=text)]
+            index = VectorStoreIndex.from_documents(documents, vector_store=vector_store)
+
+            # Initialize the query engine
+            query_engine = index.as_query_engine()
+
+            # Execute the query
+            query = create_query()
+            response = query_engine.query(query)
+
+            # Display the response
+            if not response.response:
+                st.warning(
+                    "⚠️ No relevant information found in the resume. Please ensure the document is a valid CV or resume.")
+            else:
+                st.markdown("### Resume Analysis Results 📊")
+                st.write(response.response)
+
+        except Exception as e:
+            st.error(f"An error occurred during analysis: {e}")
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("Created with Streamlit, LlamaIndex, FAISS, and Groq 💡 By ABDULLAH 🗿")
