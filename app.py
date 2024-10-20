@@ -81,7 +81,7 @@ elif analyze_button:
             vector_store = FaissVectorStore(faiss_index=faiss_index)
 
             # Initialize the Groq model with an appropriate model name
-            groq_model_name = "gemma2-9b-it"  # Replace with the actual model name you want to use
+            groq_model_name = "mixtral-8x7b-32768"  # Replace with the actual model name you want to use
             llm = Groq(api_key=groq_api_key, model=groq_model_name)
 
             # Set the LLM in Settings
