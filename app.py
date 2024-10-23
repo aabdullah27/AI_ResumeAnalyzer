@@ -41,11 +41,12 @@ def create_query():
     Based on this resume or CV, perform the following:
     1. Experience Analysis: Determine the total years of experience and categorize the candidate as Junior, Mid-level, or Senior.
     2. Extract top 3 projects or accomplishments listed in the resume.
-    3. ATS Compatibility Score: Provide a score out of 10 based on formatting, keyword usage, and structure.
+    3. ATS Compatibility Score: Provide a score out of 100 based on formatting, keyword usage, and structure.
     4. Readability and Clarity Rating: Rate the clarity of the resume on a scale of 1 to 10.
     5. Job Roles: Tell the top 3 JOB roles this candidate is perfect for in a numbering manner.
     6. Name and Age: Show the name and age if available.
-    NOTE: If there is any content except Resume or CV, provide a polite answer to upload a CV for analysis.
+    NOTE: If there is any content except Resume or CV, provide a polite answer to upload a CV for analysis. And you Highly meticulous in evaluating and reviewing, 
+          maintaining strict standards to ensure accuracy and precision.
     '''
 
 
